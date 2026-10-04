@@ -43,11 +43,12 @@ echo CHECKPOINT 7: running npm run dist>>"%LOGFILE%"
 call npm run dist >>"%LOGFILE%" 2>&1
 echo CHECKPOINT 8: npm run dist done, errorlevel=%errorlevel%>>"%LOGFILE%"
 if errorlevel 1 goto BUILD_FAILED
+for /f "tokens=*" %%v in ('node -p "require('./package.json').version"') do set APP_VER=%%v
 
 echo.
 echo Done. Look inside the "dist" folder for two files:
-echo   PhaseCraft Setup 1.0.0.exe   (installer, puts PhaseCraft in the Start Menu)
-echo   PhaseCraft 1.0.0.exe         (portable, runs directly, no install needed)
+echo   PhaseCraft-Setup-%APP_VER%.exe      (installer, puts PhaseCraft in the Start Menu)
+echo   PhaseCraft-Portable-%APP_VER%.exe   (portable, runs directly, no install needed)
 echo Full log saved to build_log.txt
 echo CHECKPOINT 9: build succeeded>>"%LOGFILE%"
 echo.

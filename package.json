@@ -1,36 +1,78 @@
 {
-  "name": "phasecraft",
+  "name": "phasecraft-pat2",
   "productName": "PhaseCraft",
   "version": "1.0.0",
-  "description": "Three-Phase Transformer Trainer for NC(V) Electrical Principles and Practice, Level 4",
+  "description": "PhaseCraft: three-phase transformer verification tool (Windows) and practice trainer (Android) for NC(V) Electrical Principles and Practice, Level 4, PAT 2",
   "main": "main.js",
-  "author": "MJ Maake",
-  "license": "UNLICENSED",
+  "author": {
+    "name": "MJ Maake",
+    "email": "manoke@hotmail.co.za"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
+  "homepage": "https://github.com/Manofork/phasecraft-pat2#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Manofork/phasecraft-pat2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Manofork/phasecraft-pat2/issues"
+  },
+  "keywords": [
+    "three-phase-transformer",
+    "electrical-engineering",
+    "electron",
+    "capacitor",
+    "android",
+    "tvet",
+    "education",
+    "south-africa"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win"
-  },
-  "devDependencies": {
-    "electron": "^30.0.0",
-    "electron-builder": "^24.13.3"
+    "lint": "node --check main.js && node scripts/check-app.js && node android-app/scripts/check-www.js",
+    "test": "node android-app/scripts/test-scenarios.js",
+    "screenshot": "electron scripts/screenshot.js",
+    "dist": "electron-builder --win --x64 --publish never"
   },
   "build": {
     "appId": "com.mjmaake.phasecraft",
     "productName": "PhaseCraft",
+    "copyright": "MJ Maake",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
     "files": [
       "main.js",
       "phasecraft.html",
       "package.json"
     ],
     "win": {
-      "target": ["nsis", "portable"],
-      "icon": "icon.ico"
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PhaseCraft",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "PhaseCraft-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "PhaseCraft-Portable-${version}.${ext}"
     }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
   }
 }

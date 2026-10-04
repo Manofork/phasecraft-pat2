@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "PhaseCraft Trainer, Android edition for students",
   "author": "MJ Maake",
-  "license": "UNLICENSED",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "private": true,
   "scripts": {
     "sync": "cap sync android",
