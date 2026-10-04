@@ -1,0 +1,46 @@
+name: Bug report
+description: Something in the app does not work as expected
+labels: [bug]
+body:
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Which edition?
+      options:
+        - Windows installer
+        - Windows portable exe
+        - Android app
+        - From source
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: The version in the file name you downloaded
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Windows version, or Android version and phone model
+      placeholder: "Windows 11 23H2, or Android 14 on Samsung A15"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour and screenshots
+    validations:
+      required: true

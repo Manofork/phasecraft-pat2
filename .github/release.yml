@@ -1,0 +1,20 @@
+changelog:
+  exclude:
+    labels: [skip-changelog]
+  categories:
+    - title: New features
+      labels: [enhancement]
+    - title: Calculation fixes
+      labels: [calculation]
+    - title: Android
+      labels: [android]
+    - title: Bug fixes
+      labels: [bug]
+    - title: Interface
+      labels: [ui]
+    - title: Documentation
+      labels: [documentation]
+    - title: Maintenance
+      labels: [dependencies, ci]
+    - title: Other changes
+      labels: ["*"]

@@ -1,0 +1,53 @@
+name: Calculation discrepancy
+description: A computed value differs from the DHET guide or a hand calculation
+labels: [calculation]
+body:
+  - type: markdown
+    attributes:
+      value: Please give the exact inputs so the result can be reproduced.
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did you see it?
+      options:
+        - Windows app
+        - Android Checker mode
+        - Android Practice mode
+    validations:
+      required: true
+  - type: dropdown
+    id: subtask
+    attributes:
+      label: Which subtask?
+      options:
+        - Subtask 1 Planning (winding resistance)
+        - Subtask 2 Star-Delta
+        - Subtask 3 Star-Star
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Inputs
+      placeholder: "T1 244 / 6.00, T2 246 / 6.10, T3 244 / 6.05"
+    validations:
+      required: true
+  - type: input
+    id: shown
+    attributes:
+      label: Value or verdict shown by the app
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: Expected value or verdict
+    validations:
+      required: true
+  - type: textarea
+    id: working
+    attributes:
+      label: Working or reference
+      description: Your calculation, or the page in the DHET guide
+    validations:
+      required: true
