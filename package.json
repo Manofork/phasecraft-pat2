@@ -1,0 +1,36 @@
+{
+  "name": "phasecraft",
+  "productName": "PhaseCraft",
+  "version": "1.0.0",
+  "description": "Three-Phase Transformer Trainer for NC(V) Electrical Principles and Practice, Level 4",
+  "main": "main.js",
+  "author": "MJ Maake",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.mjmaake.phasecraft",
+    "productName": "PhaseCraft",
+    "files": [
+      "main.js",
+      "phasecraft.html",
+      "package.json"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}
