@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PhaseCraft</string>
+    <string name="title_activity_main">PhaseCraft</string>
+    <string name="package_name">com.mjmaake.phasecraft</string>
+    <string name="custom_url_scheme">com.mjmaake.phasecraft</string>
+</resources>

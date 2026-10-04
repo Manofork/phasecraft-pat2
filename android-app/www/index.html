@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>PhaseCraft Trainer</title>
+<style>
+:root {
+  --navy: #1b2a41;
+  --navy2: #24374f;
+  --teal: #0f7d8f;
+  --amber: #c8862a;
+  --green: #1e7d3c;
+  --red: #b3261e;
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --border: #dde1e6;
+  --text: #1c1c1c;
+  --muted: #6b7280;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  -webkit-user-select: none; user-select: none;
+}
+input, .mono, .result-value, .calc-line, .range-line {
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+body { padding-bottom: 78px; }
+
+header.app-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  color: #fff;
+  padding: 16px 16px 14px 16px;
+  position: sticky; top: 0; z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+header.app-header .row { display: flex; align-items: center; gap: 10px; }
+header.app-header .logo {
+  width: 34px; height: 34px; border-radius: 8px; flex: none;
+  background: linear-gradient(135deg, #22344f, #152135);
+  display: flex; align-items: center; justify-content: center;
+}
+header.app-header .logo svg { width: 22px; height: 22px; }
+header.app-header h1 { font-size: 19px; margin: 0; line-height: 1.1; }
+header.app-header .sub { font-size: 11px; color: #b9c4d3; margin-top: 1px; }
+
+.mode-switch {
+  display: flex; gap: 6px; margin-top: 12px;
+  background: rgba(255,255,255,0.08); border-radius: 10px; padding: 3px;
+}
+.mode-switch button {
+  flex: 1; border: none; background: transparent; color: #cdd6e2;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 13.5px; font-weight: 600; padding: 9px 4px; border-radius: 8px;
+}
+.mode-switch button.active { background: #fff; color: var(--navy); }
+
+.container { padding: 14px; max-width: 640px; margin: 0 auto; }
+
+.subtask-pills { display: flex; gap: 6px; margin-bottom: 12px; }
+.subtask-pills button {
+  flex: 1; border: 1px solid var(--border); background: var(--card);
+  border-radius: 9px; padding: 9px 4px; font-size: 12px; font-weight: 600;
+  color: var(--muted); font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.subtask-pills button.active.s1 { background: var(--teal); border-color: var(--teal); color: #fff; }
+.subtask-pills button.active.s2 { background: var(--amber); border-color: var(--amber); color: #fff; }
+.subtask-pills button.active.s3 { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; margin-bottom: 14px; border-top: 4px solid var(--teal);
+}
+.card.accent-amber { border-top-color: var(--amber); }
+.card.accent-navy { border-top-color: var(--navy); }
+
+.card h2 { font-size: 16px; margin: 0 0 8px 0; color: var(--navy); }
+.card p.lead { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 0 0 12px 0; }
+
+table.reading-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+table.reading-table th, table.reading-table td {
+  border-bottom: 1px solid var(--border); padding: 8px 6px; font-size: 13px; text-align: left;
+}
+table.reading-table th {
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.02em;
+}
+table.reading-table td.val {
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 700; text-align: right;
+}
+
+.verdict-buttons { display: flex; gap: 10px; margin-top: 14px; }
+.verdict-buttons button {
+  flex: 1; border: none; border-radius: 10px; padding: 14px 8px; font-size: 15px;
+  font-weight: 700; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: #fff;
+}
+.verdict-buttons button.btn-pass { background: var(--green); }
+.verdict-buttons button.btn-fail { background: var(--red); }
+.verdict-buttons button:disabled { opacity: 0.45; }
+
+.feedback { margin-top: 14px; border-radius: 10px; padding: 12px 14px; display: none; }
+.feedback.show { display: block; }
+.feedback.correct { background: #e4f6ec; border: 1px solid #b6e3c9; }
+.feedback.incorrect { background: #fce9e8; border: 1px solid #f1bdb9; }
+.feedback .fb-title {
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 700; font-size: 14px; margin-bottom: 6px;
+}
+.feedback.correct .fb-title { color: var(--green); }
+.feedback.incorrect .fb-title { color: var(--red); }
+.feedback .calc-line { font-size: 13px; margin: 4px 0; color: #333; }
+.feedback .explain { font-size: 13px; color: #333; margin-top: 6px; line-height: 1.5; }
+
+.next-btn {
+  width: 100%; margin-top: 12px; border: none; border-radius: 10px; padding: 13px;
+  background: var(--navy); color: #fff; font-weight: 700; font-size: 14.5px;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; display: none;
+}
+.next-btn.show { display: block; }
+
+.score-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 14px;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.score-bar .score-label { font-size: 12px; color: var(--muted); }
+.score-bar .score-value { font-size: 16px; font-weight: 700; color: var(--navy); }
+.score-bar button.reset-link {
+  border: none; background: none; color: var(--teal); font-size: 12px; font-weight: 600;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.field-row { margin-bottom: 10px; }
+.field-row label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+.field-row input {
+  width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 15px; background: #fbfcfd;
+}
+.field-row input:focus { outline: 2px solid var(--teal); border-color: var(--teal); }
+
+.result-line { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 4px 0; }
+.result-value { font-size: 22px; font-weight: 800; }
+.result-value.pass { color: var(--green); }
+.result-value.fail { color: var(--red); }
+.result-value.pending { color: var(--muted); font-size: 16px; font-weight: 600; }
+.calc-box { display: inline-block; border-radius: 6px; padding: 3px 10px; margin: 4px 0 6px 0; font-size: 13px; }
+.calc-box.calc-pass { background: #e4f6ec; border: 1px solid #b6e3c9; color: var(--green); }
+.calc-box.calc-fail { background: #fce9e8; border: 1px solid #f1bdb9; color: var(--red); }
+.calc-box.calc-pending { color: var(--muted); }
+.range-line { font-size: 12px; color: var(--muted); }
+.verdict-banner {
+  margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.verdict-banner.verdict-pass { background: #e4f6ec; color: var(--green); border: 1px solid #b6e3c9; }
+.verdict-banner.verdict-fail { background: #fce9e8; color: var(--red); border: 1px solid #f1bdb9; }
+.verdict-banner.verdict-pending { background: #f1f2f4; color: var(--muted); }
+
+.footer-note {
+  text-align: center; font-size: 11.5px; color: var(--muted); padding: 10px 20px 4px 20px; line-height: 1.5;
+}
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 6;
+  background: #fff; border-top: 1px solid var(--border);
+  display: flex; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)) 8px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.bottom-nav button {
+  flex: 1; border: none; background: none; padding: 8px 4px; border-radius: 10px;
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 11.5px; font-weight: 600; color: var(--muted);
+}
+.bottom-nav button.active { color: var(--navy); background: #eef1f5; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="row">
+    <div class="logo">
+      <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 128 46 L 206 186 L 50 186 Z" fill="none" stroke="#0f7d8f" stroke-width="16" stroke-linejoin="round"/>
+        <g stroke="#c8862a" stroke-width="16" stroke-linecap="round">
+          <line x1="128" y1="128" x2="128" y2="72"/>
+          <line x1="128" y1="128" x2="80" y2="158"/>
+          <line x1="128" y1="128" x2="176" y2="158"/>
+        </g>
+        <circle cx="128" cy="128" r="12" fill="#f4f7f9"/>
+      </svg>
+    </div>
+    <div>
+      <h1>PhaseCraft Trainer</h1>
+      <div class="sub">NC(V) Electrical Principles and Practice, Level 4</div>
+    </div>
+  </div>
+  <div class="mode-switch">
+    <button id="modeBtnPractice" class="active" onclick="setMode('practice')">Practice</button>
+    <button id="modeBtnChecker" onclick="setMode('checker')">Checker</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ===================== PRACTICE MODE ===================== -->
+  <div id="view-practice">
+    <div class="subtask-pills">
+      <button id="pillP1" class="active s1" onclick="setPracticeSubtask('s1')">Subtask 1</button>
+      <button id="pillP2" class="s2" onclick="setPracticeSubtask('s2')">Subtask 2</button>
+      <button id="pillP3" class="s3" onclick="setPracticeSubtask('s3')">Subtask 3</button>
+    </div>
+
+    <div class="score-bar">
+      <div>
+        <div class="score-label">Practice score</div>
+        <div class="score-value" id="scoreValue">0 / 0</div>
+      </div>
+      <button class="reset-link" onclick="resetScore()">Reset score</button>
+    </div>
+
+    <div class="card" id="practiceCard">
+      <h2 id="practiceTitle">Subtask 1: Winding Resistance Check</h2>
+      <p class="lead" id="practiceLead">
+        A student measured these readings with a multimeter. Decide whether this set of
+        transformers is functional and within the 5% matching tolerance.
+      </p>
+
+      <div id="practiceTableWrap"></div>
+
+      <div class="verdict-buttons">
+        <button class="btn-pass" id="btnGuessPass" onclick="submitGuess(true)">Pass</button>
+        <button class="btn-fail" id="btnGuessFail" onclick="submitGuess(false)">Fail</button>
+      </div>
+
+      <div class="feedback" id="feedbackBox">
+        <div class="fb-title" id="fbTitle"></div>
+        <div id="fbCalc"></div>
+        <div class="explain" id="fbExplain"></div>
+      </div>
+
+      <button class="next-btn" id="nextBtn" onclick="nextScenario()">Next scenario</button>
+    </div>
+  </div>
+
+  <!-- ===================== CHECKER MODE ===================== -->
+  <div id="view-checker" style="display:none;">
+    <div class="subtask-pills">
+      <button id="pillC1" class="active s1" onclick="setCheckerSubtask('s1')">Subtask 1</button>
+      <button id="pillC2" class="s2" onclick="setCheckerSubtask('s2')">Subtask 2</button>
+      <button id="pillC3" class="s3" onclick="setCheckerSubtask('s3')">Subtask 3</button>
+    </div>
+
+    <!-- Checker Subtask 1 -->
+    <div id="checker-s1">
+      <div class="card">
+        <h2>Winding Resistance (each transformer)</h2>
+        <p class="lead">Enter both winding readings for each of the three transformers.</p>
+        <div id="c1_fields"></div>
+      </div>
+      <div class="card">
+        <h2>Primary windings tolerance</h2>
+        <div id="c1_primary_result"></div>
+      </div>
+      <div class="card accent-amber">
+        <h2>Secondary windings tolerance</h2>
+        <div id="c1_secondary_result"></div>
+      </div>
+      <div class="card accent-navy">
+        <h2>Overall verdict</h2>
+        <div id="c1_overall" class="verdict-banner verdict-pending">Enter all six readings to check.</div>
+      </div>
+    </div>
+
+    <!-- Checker Subtask 2 -->
+    <div id="checker-s2" style="display:none;">
+      <div class="card accent-amber">
+        <h2>Secondary line voltages</h2>
+        <p class="lead">Enter the three secondary line to line voltage readings.</p>
+        <div class="field-row"><label>Line voltage L1 to L2 (V)</label><input type="number" step="0.01" id="c2_a" oninput="refreshChecker2()"></div>
+        <div class="field-row"><label>Line voltage L1 to L3 (V)</label><input type="number" step="0.01" id="c2_b" oninput="refreshChecker2()"></div>
+        <div class="field-row"><label>Line voltage L2 to L3 (V)</label><input type="number" step="0.01" id="c2_c" oninput="refreshChecker2()"></div>
+      </div>
+      <div class="card accent-amber">
+        <h2>Line voltage spread</h2>
+        <div id="c2_result"></div>
+      </div>
+    </div>
+
+    <!-- Checker Subtask 3 -->
+    <div id="checker-s3" style="display:none;">
+      <div class="card accent-navy">
+        <h2>Secondary line voltages</h2>
+        <div class="field-row"><label>Line voltage L1 to L2 (V)</label><input type="number" step="0.01" id="c3_l1l2" oninput="refreshChecker3()"></div>
+        <div class="field-row"><label>Line voltage L1 to L3 (V)</label><input type="number" step="0.01" id="c3_l1l3" oninput="refreshChecker3()"></div>
+        <div class="field-row"><label>Line voltage L2 to L3 (V)</label><input type="number" step="0.01" id="c3_l2l3" oninput="refreshChecker3()"></div>
+      </div>
+      <div class="card accent-navy">
+        <h2>Secondary phase voltages</h2>
+        <div class="field-row"><label>Phase voltage L1 to N (V)</label><input type="number" step="0.01" id="c3_l1n" oninput="refreshChecker3()"></div>
+        <div class="field-row"><label>Phase voltage L2 to N (V)</label><input type="number" step="0.01" id="c3_l2n" oninput="refreshChecker3()"></div>
+        <div class="field-row"><label>Phase voltage L3 to N (V)</label><input type="number" step="0.01" id="c3_l3n" oninput="refreshChecker3()"></div>
+      </div>
+      <div class="card">
+        <h2>Line voltage balance</h2>
+        <div id="c3_line_result"></div>
+      </div>
+      <div class="card accent-amber">
+        <h2>Phase voltage balance</h2>
+        <div id="c3_phase_result"></div>
+      </div>
+      <div class="card accent-navy">
+        <h2>Root three line to phase relationship</h2>
+        <div id="c3_ratio_result"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    Designed and built by MJ Maake &middot; For student self practice. Ask your lecturer to
+    verify official assessment results.
+  </p>
+</div>
+
+<div class="bottom-nav">
+  <button class="active" id="navPractice" onclick="setMode('practice')">Practice</button>
+  <button id="navChecker" onclick="setMode('checker')">Checker</button>
+</div>
+
+<script>
+/* ===================== Shared math (mirrors the desktop PhaseCraft logic) ===================== */
+const SQRT3 = Math.sqrt(3);
+function fmt(n, d=2) { return n.toFixed(d); }
+function rand(min, max) { return min + Math.random() * (max - min); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function computeGroup(vals) {
+  const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+  const devs = vals.map(v => avg === 0 ? 0 : Math.abs(v - avg) / avg * 100);
+  const tol = Math.max(...devs);
+  const worstIdx = devs.indexOf(tol);
+  return { avg, tol, worstVal: vals[worstIdx], rangeLow: avg * 0.95, rangeHigh: avg * 1.05 };
+}
+
+/* ===================== Mode / navigation ===================== */
+let currentMode = 'practice';
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('view-practice').style.display = mode === 'practice' ? '' : 'none';
+  document.getElementById('view-checker').style.display = mode === 'checker' ? '' : 'none';
+  document.getElementById('modeBtnPractice').classList.toggle('active', mode === 'practice');
+  document.getElementById('modeBtnChecker').classList.toggle('active', mode === 'checker');
+  document.getElementById('navPractice').classList.toggle('active', mode === 'practice');
+  document.getElementById('navChecker').classList.toggle('active', mode === 'checker');
+}
+
+/* ===================== PRACTICE MODE ===================== */
+let practiceSubtask = 's1';
+let score = { correct: 0, total: 0 };
+let currentScenario = null;
+let answered = false;
+
+function setPracticeSubtask(s) {
+  practiceSubtask = s;
+  ['pillP1','pillP2','pillP3'].forEach((id, idx) => {
+    document.getElementById(id).classList.toggle('active', ['s1','s2','s3'][idx] === s);
+  });
+  const card = document.getElementById('practiceCard');
+  card.className = 'card' + (s === 's2' ? ' accent-amber' : s === 's3' ? ' accent-navy' : '');
+  nextScenario();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('scoreValue').textContent = score.correct + ' / ' + score.total;
+}
+function resetScore() {
+  score = { correct: 0, total: 0 };
+  updateScoreDisplay();
+}
+
+/* ---- Scenario generators ---- */
+function genS1Scenario() {
+  const forceFail = Math.random() < 0.4;
+  const basePrimary = rand(240, 250);
+  const baseSecondary = rand(5.7, 6.3);
+  const spreadPct = () => rand(0.2, 2.2);
+  let primary = [0,1,2].map(() => basePrimary * (1 + (Math.random() - 0.5) * spreadPct() / 50));
+  let secondary = [0,1,2].map(() => baseSecondary * (1 + (Math.random() - 0.5) * spreadPct() / 50));
+  if (forceFail) {
+    const idx = Math.floor(Math.random() * 3);
+    if (Math.random() < 0.5) primary[idx] = basePrimary * (1 + pick([1, -1]) * rand(0.10, 0.18));
+    else secondary[idx] = baseSecondary * (1 + pick([1, -1]) * rand(0.10, 0.18));
+  }
+  return {
+    kind: 's1',
+    primary: primary.map(v => +v.toFixed(2)),
+    secondary: secondary.map(v => +v.toFixed(2))
+  };
+}
+function genS2Scenario() {
+  const forceFail = Math.random() < 0.4;
+  const base = rand(34, 37);
+  const spreadPct = () => rand(0.2, 2.5);
+  let vals = [0,1,2].map(() => base * (1 + (Math.random() - 0.5) * spreadPct() / 50));
+  if (forceFail) {
+    const idx = Math.floor(Math.random() * 3);
+    vals[idx] = base * (1 + pick([1, -1]) * rand(0.10, 0.18));
+  }
+  return { kind: 's2', vals: vals.map(v => +v.toFixed(2)) };
+}
+function genS3Scenario() {
+  const forceFail = Math.random() < 0.45;
+  const baseLine = rand(34, 36.5);
+  const baseNoise = () => rand(0.2, 2.0);
+  let lineVals = [0,1,2].map(() => baseLine * (1 + (Math.random() - 0.5) * baseNoise() / 50));
+  let phaseBase = baseLine / SQRT3;
+  let phaseVals = [0,1,2].map(() => phaseBase * (1 + (Math.random() - 0.5) * baseNoise() / 50));
+  if (forceFail) {
+    const mode = pick(['line', 'phase', 'ratio']);
+    const idx = Math.floor(Math.random() * 3);
+    if (mode === 'line') lineVals[idx] = baseLine * (1 + pick([1, -1]) * rand(0.10, 0.18));
+    else if (mode === 'phase') phaseVals[idx] = phaseBase * (1 + pick([1, -1]) * rand(0.10, 0.18));
+    else phaseVals = phaseVals.map(v => v * (1 + pick([1, -1]) * rand(0.08, 0.14)));
+  }
+  return {
+    kind: 's3',
+    lineVals: lineVals.map(v => +v.toFixed(2)),
+    phaseVals: phaseVals.map(v => +v.toFixed(2))
+  };
+}
+
+/* ---- Evaluate correct pass/fail + build explanation ---- */
+function evaluateScenario(sc) {
+  if (sc.kind === 's1') {
+    const p = computeGroup(sc.primary);
+    const s = computeGroup(sc.secondary);
+    const pass = p.tol <= 5 && s.tol <= 5;
+    return {
+      pass,
+      calcLines: [
+        'Primary group worst case: ' + fmt(p.tol) + ' % (limit 5 %)',
+        'Secondary group worst case: ' + fmt(s.tol) + ' % (limit 5 %)'
+      ],
+      explain: pass
+        ? 'Both winding groups stay within the 5 % matching tolerance, so this bank is suitable to build a three phase transformer.'
+        : 'At least one winding group exceeds the 5 % matching tolerance. That transformer should be checked or swapped out before continuing.'
+    };
+  }
+  if (sc.kind === 's2') {
+    const g = computeGroup(sc.vals);
+    const pass = g.tol <= 5;
+    return {
+      pass,
+      calcLines: ['Line voltage spread: ' + fmt(g.tol) + ' % (limit 5 %)'],
+      explain: pass
+        ? 'The three secondary line voltages are close enough to each other, within 5 %, so the connection is balanced.'
+        : 'The spread between the three line voltage readings is above 5 %. That usually points to a wiring fault or a mismatched transformer.'
+    };
+  }
+  if (sc.kind === 's3') {
+    const lineG = computeGroup(sc.lineVals);
+    const phaseG = computeGroup(sc.phaseVals);
+    const ratioErr = Math.abs(lineG.avg - SQRT3 * phaseG.avg) / (SQRT3 * phaseG.avg) * 100;
+    const pass = lineG.tol <= 5 && phaseG.tol <= 5 && ratioErr <= 5;
+    return {
+      pass,
+      calcLines: [
+        'Line voltage spread: ' + fmt(lineG.tol) + ' % (limit 5 %)',
+        'Phase voltage spread: ' + fmt(phaseG.tol) + ' % (limit 5 %)',
+        'Root three ratio error: ' + fmt(ratioErr) + ' % (limit 5 %)'
+      ],
+      explain: pass
+        ? 'Both groups are balanced and the line to phase readings match the expected root three relationship, consistent with a correctly wired Star secondary.'
+        : 'One of the checks is outside tolerance, either an unbalanced group or the line and phase readings do not match the root three relationship. That points to a wiring fault.'
+    };
+  }
+}
+
+function renderPracticeTable(sc) {
+  let html = '';
+  if (sc.kind === 's1') {
+    html += '<table class="reading-table"><tr><th>Transformer</th><th>Winding A (&#8486;)</th><th>Winding B (&#8486;)</th></tr>';
+    for (let i = 0; i < 3; i++) {
+      html += '<tr><td>Transformer ' + (i+1) + '</td><td class="val">' + fmt(sc.primary[i]) + '</td><td class="val">' + fmt(sc.secondary[i]) + '</td></tr>';
+    }
+    html += '</table>';
+  } else if (sc.kind === 's2') {
+    const labels = ['L1 to L2', 'L1 to L3', 'L2 to L3'];
+    html += '<table class="reading-table"><tr><th>Reading</th><th>Line voltage (V)</th></tr>';
+    for (let i = 0; i < 3; i++) html += '<tr><td>' + labels[i] + '</td><td class="val">' + fmt(sc.vals[i]) + '</td></tr>';
+    html += '</table>';
+  } else if (sc.kind === 's3') {
+    const lineLabels = ['L1 to L2', 'L1 to L3', 'L2 to L3'];
+    const phaseLabels = ['L1 to N', 'L2 to N', 'L3 to N'];
+    html += '<table class="reading-table"><tr><th>Reading</th><th>Voltage (V)</th></tr>';
+    for (let i = 0; i < 3; i++) html += '<tr><td>Line ' + lineLabels[i] + '</td><td class="val">' + fmt(sc.lineVals[i]) + '</td></tr>';
+    for (let i = 0; i < 3; i++) html += '<tr><td>Phase ' + phaseLabels[i] + '</td><td class="val">' + fmt(sc.phaseVals[i]) + '</td></tr>';
+    html += '</table>';
+  }
+  document.getElementById('practiceTableWrap').innerHTML = html;
+}
+
+const PRACTICE_TITLES = {
+  s1: 'Subtask 1: Winding Resistance Check',
+  s2: 'Subtask 2: Star-Delta Line Voltage Check',
+  s3: 'Subtask 3: Star-Star Balance Check'
+};
+const PRACTICE_LEADS = {
+  s1: 'A student measured these readings with a multimeter. Decide whether this set of transformers is functional and within the 5% matching tolerance.',
+  s2: 'A student measured these secondary line voltages on a Star-Delta build. Decide whether the readings are balanced within tolerance.',
+  s3: 'A student measured these secondary line and phase voltages on a Star-Star build. Decide whether the connection checks out.'
+};
+
+function nextScenario() {
+  answered = false;
+  document.getElementById('feedbackBox').className = 'feedback';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('btnGuessPass').disabled = false;
+  document.getElementById('btnGuessFail').disabled = false;
+
+  document.getElementById('practiceTitle').textContent = PRACTICE_TITLES[practiceSubtask];
+  document.getElementById('practiceLead').textContent = PRACTICE_LEADS[practiceSubtask];
+
+  if (practiceSubtask === 's1') currentScenario = genS1Scenario();
+  else if (practiceSubtask === 's2') currentScenario = genS2Scenario();
+  else currentScenario = genS3Scenario();
+
+  renderPracticeTable(currentScenario);
+}
+
+function submitGuess(guessPass) {
+  if (answered) return;
+  answered = true;
+  document.getElementById('btnGuessPass').disabled = true;
+  document.getElementById('btnGuessFail').disabled = true;
+
+  const result = evaluateScenario(currentScenario);
+  const correct = guessPass === result.pass;
+  score.total++;
+  if (correct) score.correct++;
+  updateScoreDisplay();
+
+  const box = document.getElementById('feedbackBox');
+  box.className = 'feedback show ' + (correct ? 'correct' : 'incorrect');
+  document.getElementById('fbTitle').textContent = correct
+    ? 'Correct, the readings ' + (result.pass ? 'Pass' : 'Fail') + '.'
+    : 'Not quite, the readings actually ' + (result.pass ? 'Pass' : 'Fail') + '.';
+  document.getElementById('fbCalc').innerHTML = result.calcLines.map(l => '<div class="calc-line">' + l + '</div>').join('');
+  document.getElementById('fbExplain').textContent = result.explain;
+
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+/* ===================== CHECKER MODE ===================== */
+function setCheckerSubtask(s) {
+  ['pillC1','pillC2','pillC3'].forEach((id, idx) => {
+    document.getElementById(id).classList.toggle('active', ['s1','s2','s3'][idx] === s);
+  });
+  document.getElementById('checker-s1').style.display = s === 's1' ? '' : 'none';
+  document.getElementById('checker-s2').style.display = s === 's2' ? '' : 'none';
+  document.getElementById('checker-s3').style.display = s === 's3' ? '' : 'none';
+}
+
+function buildChecker1Fields() {
+  let html = '';
+  for (let i = 1; i <= 3; i++) {
+    html += '<div class="field-row"><label>Transformer ' + i + ', winding A (&#8486;)</label><input type="number" step="0.01" id="c1_t' + i + 'a" oninput="refreshChecker1()"></div>';
+    html += '<div class="field-row"><label>Transformer ' + i + ', winding B (&#8486;)</label><input type="number" step="0.01" id="c1_t' + i + 'b" oninput="refreshChecker1()"></div>';
+  }
+  document.getElementById('c1_fields').innerHTML = html;
+}
+
+function renderCheckerGroup(elId, g, unitSymbol, unitLabel) {
+  const el = document.getElementById(elId);
+  if (!g) {
+    el.innerHTML = '<div class="result-value pending">Not entered</div>';
+    return;
+  }
+  const pass = g.tol <= 5;
+  el.innerHTML =
+    '<div class="calc-box ' + (pass ? 'calc-pass' : 'calc-fail') + '">' + fmt(g.tol) + ' %</div>' +
+    '<div class="result-line"><span class="range-line">' + (pass ? 'Within 5% tolerance' : 'Exceeds 5% tolerance') + '</span></div>' +
+    '<div class="range-line">Acceptable range (&plusmn;5%): ' + fmt(g.rangeLow) + ' &le; ' + unitSymbol + ' &le; ' + fmt(g.rangeHigh) + ' ' + unitLabel + '</div>';
+}
+
+function refreshChecker1() {
+  const ids = [1,2,3];
+  let primaryVals = [], secondaryVals = [], allRoled = true;
+  ids.forEach(i => {
+    const a = parseFloat(document.getElementById('c1_t' + i + 'a').value);
+    const b = parseFloat(document.getElementById('c1_t' + i + 'b').value);
+    if (isNaN(a) || isNaN(b)) { allRoled = false; return; }
+    if (a >= b) { primaryVals.push(a); secondaryVals.push(b); }
+    else { primaryVals.push(b); secondaryVals.push(a); }
+  });
+  const pGroup = allRoled ? computeGroup(primaryVals) : null;
+  const sGroup = allRoled ? computeGroup(secondaryVals) : null;
+  renderCheckerGroup('c1_primary_result', pGroup, 'R', '&#8486;');
+  renderCheckerGroup('c1_secondary_result', sGroup, 'R', '&#8486;');
+
+  const overall = document.getElementById('c1_overall');
+  if (!pGroup || !sGroup) {
+    overall.className = 'verdict-banner verdict-pending';
+    overall.textContent = 'Enter all six readings to check.';
+    return;
+  }
+  const pass = pGroup.tol <= 5 && sGroup.tol <= 5;
+  overall.className = 'verdict-banner ' + (pass ? 'verdict-pass' : 'verdict-fail');
+  overall.textContent = pass
+    ? 'All three transformers are functional and within 5% tolerance on both windings.'
+    : 'One or more winding sets exceed 5% tolerance. Check or replace the mismatched transformer.';
+}
+
+function refreshChecker2() {
+  const a = parseFloat(document.getElementById('c2_a').value);
+  const b = parseFloat(document.getElementById('c2_b').value);
+  const c = parseFloat(document.getElementById('c2_c').value);
+  const el = document.getElementById('c2_result');
+  if ([a,b,c].some(v => isNaN(v))) {
+    el.innerHTML = '<div class="result-value pending">Not entered</div>';
+    return;
+  }
+  const g = computeGroup([a,b,c]);
+  renderCheckerGroup('c2_result', g, 'V', 'V');
+}
+
+function refreshChecker3() {
+  const l1l2 = parseFloat(document.getElementById('c3_l1l2').value);
+  const l1l3 = parseFloat(document.getElementById('c3_l1l3').value);
+  const l2l3 = parseFloat(document.getElementById('c3_l2l3').value);
+  const l1n = parseFloat(document.getElementById('c3_l1n').value);
+  const l2n = parseFloat(document.getElementById('c3_l2n').value);
+  const l3n = parseFloat(document.getElementById('c3_l3n').value);
+
+  const lineOk = [l1l2, l1l3, l2l3].every(v => !isNaN(v));
+  const phaseOk = [l1n, l2n, l3n].every(v => !isNaN(v));
+
+  if (!lineOk) document.getElementById('c3_line_result').innerHTML = '<div class="result-value pending">Not entered</div>';
+  if (!phaseOk) document.getElementById('c3_phase_result').innerHTML = '<div class="result-value pending">Not entered</div>';
+  if (!lineOk || !phaseOk) {
+    document.getElementById('c3_ratio_result').innerHTML = '<div class="result-value pending">Not entered</div>';
+    return;
+  }
+
+  const lineG = computeGroup([l1l2, l1l3, l2l3]);
+  const phaseG = computeGroup([l1n, l2n, l3n]);
+  renderCheckerGroup('c3_line_result', lineG, 'V', 'V');
+  renderCheckerGroup('c3_phase_result', phaseG, 'V', 'V');
+
+  const ratioErr = Math.abs(lineG.avg - SQRT3 * phaseG.avg) / (SQRT3 * phaseG.avg) * 100;
+  const pass = ratioErr <= 5;
+  document.getElementById('c3_ratio_result').innerHTML =
+    '<div class="calc-box ' + (pass ? 'calc-pass' : 'calc-fail') + '">' + fmt(ratioErr) + ' %</div>' +
+    '<div class="range-line">' + (pass ? 'Matches root three relationship' : 'Does not match root three relationship') + '</div>';
+}
+
+/* ===================== Init ===================== */
+buildChecker1Fields();
+nextScenario();
+</script>
+</body>
+</html>

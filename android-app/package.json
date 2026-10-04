@@ -1,0 +1,21 @@
+{
+  "name": "phasecraft-mobile",
+  "productName": "PhaseCraft",
+  "version": "1.0.0",
+  "description": "PhaseCraft Trainer, Android edition for students",
+  "author": "MJ Maake",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync android",
+    "open": "cap open android",
+    "add-android": "cap add android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}
