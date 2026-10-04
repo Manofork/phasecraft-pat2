@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify tag and versions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Tag must match both package versions
+        id: v
+        shell: bash
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          ROOT_VERSION=$(node -p "require('./package.json').version")
+          ANDROID_VERSION=$(node -p "require('./android-app/package.json').version")
+          for V in "$ROOT_VERSION" "$ANDROID_VERSION"; do
+            if [ "$V" != "$TAG_VERSION" ]; then
+              echo "::error::Tag v$TAG_VERSION does not match a package.json version ($V)"
+              exit 1
+            fi
+          done
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+      - run: npm run lint
+      - run: npm test
+
+  build-windows:
+    name: Build Windows x64
+    needs: verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: dist/*.exe
+          if-no-files-found: error
+
+  build-android:
+    name: Build Android APK
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: android-app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install dependencies
+        working-directory: android-app
+        run: npm ci
+      - name: Sync web assets into the native project
+        working-directory: android-app
+        run: npx cap sync android
+      - name: Build debug APK
+        working-directory: android-app/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon \
+            -PappVersionName=${{ needs.verify.outputs.version }} \
+            -PappVersionCode=${{ github.run_number }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android-app/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub Release
+    needs: [verify, build-windows, build-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - name: Name the APK and generate checksums
+        shell: bash
+        run: |
+          mv release/app-debug.apk "release/PhaseCraft-Trainer-${{ needs.verify.outputs.version }}-debug.apk"
+          cd release
+          sha256sum *.exe *.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          name: PhaseCraft ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            release/PhaseCraft-Setup-*.exe
+            release/PhaseCraft-Portable-*.exe
+            release/PhaseCraft-Trainer-*-debug.apk
+            release/SHA256SUMS.txt
