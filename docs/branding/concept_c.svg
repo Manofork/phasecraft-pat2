@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bgC" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22344f"/>
+      <stop offset="1" stop-color="#152135"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="256" height="256" rx="56" fill="url(#bgC)"/>
+  <!-- Delta triangle -->
+  <path d="M 128 46 L 206 186 L 50 186 Z" fill="none" stroke="#0f7d8f" stroke-width="12" stroke-linejoin="round"/>
+  <!-- Star (Y) lines -->
+  <g stroke="#c8862a" stroke-width="12" stroke-linecap="round">
+    <line x1="128" y1="128" x2="128" y2="72"/>
+    <line x1="128" y1="128" x2="80" y2="158"/>
+    <line x1="128" y1="128" x2="176" y2="158"/>
+  </g>
+  <circle cx="128" cy="128" r="9" fill="#f4f7f9"/>
+</svg>

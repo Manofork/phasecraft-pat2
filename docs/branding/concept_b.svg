@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bgB" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f7d8f"/>
+      <stop offset="1" stop-color="#0b5c6a"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="256" height="256" rx="56" fill="url(#bgB)"/>
+  <!-- laminated core -->
+  <rect x="98" y="52" width="16" height="152" rx="4" fill="#f4f7f9"/>
+  <rect x="142" y="52" width="16" height="152" rx="4" fill="#f4f7f9"/>
+  <rect x="90" y="52" width="76" height="14" rx="4" fill="#f4f7f9"/>
+  <rect x="90" y="190" width="76" height="14" rx="4" fill="#f4f7f9"/>
+  <!-- primary coil (amber) left leg -->
+  <g fill="none" stroke="#c8862a" stroke-width="7" stroke-linecap="round">
+    <ellipse cx="106" cy="86" rx="26" ry="10"/>
+    <ellipse cx="106" cy="106" rx="26" ry="10"/>
+    <ellipse cx="106" cy="126" rx="26" ry="10"/>
+    <ellipse cx="106" cy="146" rx="26" ry="10"/>
+  </g>
+  <!-- secondary coil (navy) right leg -->
+  <g fill="none" stroke="#1b2a41" stroke-width="7" stroke-linecap="round">
+    <ellipse cx="150" cy="96" rx="26" ry="10"/>
+    <ellipse cx="150" cy="116" rx="26" ry="10"/>
+    <ellipse cx="150" cy="136" rx="26" ry="10"/>
+    <ellipse cx="150" cy="156" rx="26" ry="10"/>
+  </g>
+</svg>
