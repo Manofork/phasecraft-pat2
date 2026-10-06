@@ -113,7 +113,7 @@ jobs:
           sha256sum *.exe *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
       - name: Publish
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: PhaseCraft ${{ github.ref_name }}
           generate_release_notes: true
